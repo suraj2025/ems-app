@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "ROLLUP_NO_NATIVE": "1"
+    }
+  }
+}
