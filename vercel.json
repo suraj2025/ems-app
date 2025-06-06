@@ -3,5 +3,11 @@
     "env": {
       "ROLLUP_NO_NATIVE": "1"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
