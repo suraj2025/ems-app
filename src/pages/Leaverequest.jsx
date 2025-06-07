@@ -21,7 +21,7 @@ const LeaveRequest = () => {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
-  const uri="http://ems-app-env-1.eba-tbst2szu.eu-north-1.elasticbeanstalk.com"
+  const uri="https://springboot-ems.onrender.com"
 
   const fetchLeaveRequests = async () => {
     try {
