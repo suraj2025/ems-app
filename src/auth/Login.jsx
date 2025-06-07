@@ -8,7 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const uri="http://ems-app-env-1.eba-tbst2szu.eu-north-1.elasticbeanstalk.com"
+  const uri="https://springboot-ems.onrender.com"
 
   const handleLogin = async (e) => {
     e.preventDefault();
