@@ -9,7 +9,7 @@ const Register = () => {
     const [role, setRole] = useState('admin'); // default value
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const uri="http://ems-app-env-1.eba-tbst2szu.eu-north-1.elasticbeanstalk.com"
+    const uri="https://springboot-ems.onrender.com"
 
     const handleRegister = async (e) => {
         e.preventDefault();
