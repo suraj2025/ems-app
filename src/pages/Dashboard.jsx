@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [recentLeaves, setRecentLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const uri="https://springboot-ems.onrender.com";
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -17,13 +18,13 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
 
         // Fetch employees and count
-        const response = await axios.get("http://localhost:8081/api/employees/my-employees", {
+        const response = await axios.get(`${uri}/api/employees/my-employees`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEmp(response.data.length);
 
         // Fetch all leaves for the user
-        const response1 = await axios.get("http://localhost:8081/api/leaveRequests/my-leaves", {
+        const response1 = await axios.get(`${uri}/api/leaveRequests/my-leaves`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const leaves = response1.data;
@@ -37,7 +38,7 @@ const Dashboard = () => {
         setRejected(leaves.filter((l) => l.status === "REJECTED").length);
 
         // Fetch recent leaves for table
-        const leavesRes = await axios.get("http://localhost:8081/api/leaveRequests/recent", {
+        const leavesRes = await axios.get(`${uri}/api/leaveRequests/recent`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRecentLeaves(leavesRes.data);
