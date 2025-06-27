@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
 
+import React, { useEffect, useState } from 'react';
+import Lottie from 'lottie-react';
+import loadingAnimation from '../assets/loading.json';
 const Attendance = () => {
+  const [loading, setLoading] = useState(true); 
   const [attendances, setAttendances] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [filteredAttendance, setFilteredAttendance] = useState([]);
@@ -15,8 +18,8 @@ const Attendance = () => {
     status: 'Present',
     employeeId: '',
   });
-  const uri="https://springboot-ems.onrender.com"
 
+  const uri = "https://springboot-ems.onrender.com";
   const token = localStorage.getItem('token');
 
   const fetchEmployees = async () => {
@@ -38,11 +41,16 @@ const Attendance = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+      console.log(data)
+      // Sort by newest date
+      data.sort((a, b) => new Date(b.date) - new Date(a.date));
       setAttendances(data);
       setFilteredAttendance(data);
     } catch (err) {
       console.error('Failed to fetch attendance records:', err);
-    }
+    }finally {
+    setLoading(false);  // End loading
+  }
   };
 
   useEffect(() => {
@@ -102,7 +110,7 @@ const Attendance = () => {
       setFilteredAttendance(attendances);
     } else {
       const filtered = attendances.filter((att) =>
-        att.employee?.id?.toLowerCase().includes(value.toLowerCase())
+        att.employeeId?.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredAttendance(filtered);
     }
@@ -115,6 +123,7 @@ const Attendance = () => {
 
   const handleUpdate = async () => {
     try {
+      console.log(selectedAttendance)
       const res = await fetch(`${uri}/api/attendances/${selectedAttendance.id}`, {
         method: 'PUT',
         headers: {
@@ -124,7 +133,7 @@ const Attendance = () => {
         body: JSON.stringify({
           date: selectedAttendance.date,
           status: selectedAttendance.status,
-          employee: { id: selectedAttendance.employee.id },
+          employee: { id: selectedAttendance.employeeId },
         }),
       });
       if (res.ok) {
@@ -136,7 +145,7 @@ const Attendance = () => {
         alert(err.message || 'Update failed');
       }
     } catch (err) {
-      alert('Failed to update attendance',err);
+      alert('Failed to update attendance', err);
     }
   };
 
@@ -151,7 +160,7 @@ const Attendance = () => {
       setShowModal(false);
       fetchAttendances();
     } catch (err) {
-      alert('Failed to delete record',err);
+      alert('Failed to delete record', err);
     }
   };
 
@@ -241,36 +250,50 @@ const Attendance = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredAttendance.length > 0 ? (
-            filteredAttendance.map((att) => (
-              <tr
-                key={att.id}
-                onClick={() => handleRowClick(att)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                <td className="border p-2">{att.date}</td>
-                <td className="border p-2">{att.status}</td>
-                <td className="border p-2">{att.employee?.id}</td>
-                <td className="border p-2">{att.employee?.name}</td>
-                <td className="border p-2">{att.employee?.department}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="text-center py-4">No attendance records found.</td>
-            </tr>
-          )}
-        </tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="5" className="text-center py-8">
+        <Lottie
+          animationData={loadingAnimation}
+          className="w-[250px] sm:w-[300px] md:w-[400px] lg:w-[450px] mx-auto"
+        />
+        <p className="mt-4 text-gray-500">Loading attendance records...</p>
+      </td>
+    </tr>
+  ) : filteredAttendance.length > 0 ? (
+    filteredAttendance.map((att) => (
+      <tr
+        key={att.id}
+        onClick={() => handleRowClick(att)}
+        className="cursor-pointer hover:bg-gray-100"
+      >
+        <td className="border p-2">
+          {att.date ? new Date(att.date).toLocaleDateString() : ''}
+        </td>
+        <td className="border p-2">{att.status}</td>
+        <td className="border p-2">{att.employeeId}</td>
+        <td className="border p-2">{att.name}</td>
+        <td className="border p-2">{att.department}</td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="5" className="text-center py-4 text-red-500 font-medium">
+        No attendance records found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
       </table>
 
-      {/* Edit Modal */}
       {showModal && selectedAttendance && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/40 z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] sm:w-[400px]">
             <h2 className="text-xl font-semibold mb-4">Edit Attendance</h2>
             <input
               type="date"
-              value={selectedAttendance.date}
+              value={selectedAttendance.date ? selectedAttendance.date.split('T')[0] : ''}
               onChange={(e) =>
                 setSelectedAttendance((prev) => ({ ...prev, date: e.target.value }))
               }
