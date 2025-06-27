@@ -1,16 +1,20 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import Lottie from 'lottie-react';
+import loadingAnimation from '../assets/loading.json';
 const Dashboard = () => {
+  const [loading, setLoading] = useState(true); 
   const [totalRequests, setTotalRequests] = useState(0);
   const [pending, setPending] = useState(0);
   const [approved, setApproved] = useState(0);
   const [rejected, setRejected] = useState(0);
   const [emp, setEmp] = useState(0);
   const [recentLeaves, setRecentLeaves] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const uri="https://springboot-ems.onrender.com";
+  const uri = "https://springboot-ems.onrender.com"; // ✅ correct
+
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -53,7 +57,11 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div className="text-center mt-20 text-lg">Loading...</div>;
+  if (loading) return <div className="text-center mt-20 text-lg"><Lottie
+          animationData={loadingAnimation}
+          className="w-[250px] sm:w-[300px] md:w-[400px] lg:w-[450px] mx-auto"
+        />
+        <p className="mt-4 text-gray-500">Loading dashboard details...</p></div>;
   if (error) return <div className="text-center mt-20 text-red-600">{error}</div>;
 
   return (
@@ -78,7 +86,7 @@ const Dashboard = () => {
               <th className="px-6 py-4">Employee</th>
               <th className="px-6 py-4">From</th>
               <th className="px-6 py-4">To</th>
-              <th className="px-6 py-4">Type</th>
+              <th className="px-6 py-4">Reason</th>
               <th className="px-6 py-4">Status</th>
             </tr>
           </thead>
@@ -86,7 +94,7 @@ const Dashboard = () => {
             {recentLeaves.length > 0 ? (
               recentLeaves.map((leave) => (
                 <tr key={leave.id} className="border-b hover:bg-gray-50 transition-all duration-200">
-                  <td className="px-6 py-3">{leave.employeeName || leave.employee?.name || "N/A"}</td>
+                  <td className="px-6 py-3">{leave.name} ( <b>{leave.employeeId}</b> )</td>
                   <td className="px-6 py-3">{leave.startDate}</td>
                   <td className="px-6 py-3">{leave.endDate}</td>
                   <td className="px-6 py-3">{leave.leaveType || leave.reason}</td>
