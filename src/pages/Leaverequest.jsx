@@ -1,7 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import Lottie from 'lottie-react';
+import loadingAnimation from '../assets/loading.json';
 const LeaveRequest = () => {
+  const [loading, setLoading] = useState(true);  // NEW
+
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
@@ -21,9 +25,11 @@ const LeaveRequest = () => {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
-  const uri="https://springboot-ems.onrender.com"
+  const uri = "https://springboot-ems.onrender.com"; // ✅ correct
+
 
   const fetchLeaveRequests = async () => {
+    setLoading(true); 
     try {
       const res = await axios.get(`${uri}/api/leaveRequests/my-leaves`, {
         headers,
@@ -32,7 +38,9 @@ const LeaveRequest = () => {
       setFilteredRequests(res.data);
     } catch (err) {
       console.error('Error fetching leave requests:', err);
-    }
+    }finally {
+    setLoading(false);  // End loading
+  }
   };
 
   const fetchEmployees = async () => {
@@ -85,7 +93,7 @@ const LeaveRequest = () => {
       setFilteredRequests(leaveRequests);
     } else {
       const filtered = leaveRequests.filter((lr) =>
-        lr.employee?.id?.toLowerCase().includes(value.toLowerCase())
+        lr.employeeId?.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredRequests(filtered);
     }
@@ -94,12 +102,13 @@ const LeaveRequest = () => {
   const handleRowClick = (lr) => {
     setSelectedRequest({
       ...lr,
-      employeeId: lr.employee?.id || '',
+      employeeId: lr.employeeId || '',
     });
     setShowModal(true);
   };
 
   const handleUpdate = async (lr) => {
+    console.log(lr)
     try {
       await axios.put(
         `${uri}/api/leaveRequests/${lr.id}`,
@@ -222,29 +231,42 @@ const LeaveRequest = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredRequests.length > 0 ? (
-            filteredRequests.map((lr) => (
-              <tr
-                key={lr.id}
-                onClick={() => handleRowClick(lr)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                <td className="border p-2">{lr.startDate}</td>
-                <td className="border p-2">{lr.endDate}</td>
-                <td className="border p-2">{lr.reason}</td>
-                <td className="border p-2">{lr.status}</td>
-                <td className="border p-2">{lr.employee?.id}</td>
-                <td className="border p-2">{lr.employee?.name}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="text-center py-4">
-                No leave requests found.
-              </td>
-            </tr>
-          )}
-        </tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="6" className="text-center py-8">
+        <Lottie
+          animationData={loadingAnimation}
+          className="w-[250px] sm:w-[300px] md:w-[400px] lg:w-[450px] mx-auto"
+        />
+        <p className="mt-4 text-gray-500">Loading leave requests...</p>
+      </td>
+    </tr>
+  ) : filteredRequests.length === 0 ? (
+    <tr>
+      <td colSpan="6" className="text-center py-4 text-red-500 font-medium">
+        No leave requests found.
+      </td>
+    </tr>
+  ) : (
+    filteredRequests.map((lr) => (
+      <tr
+        key={lr.id}
+        onClick={() => handleRowClick(lr)}
+        className="cursor-pointer hover:bg-gray-100"
+      >
+        <td className="border p-2">{lr.startDate}</td>
+        <td className="border p-2">{lr.endDate}</td>
+        <td className="border p-2">{lr.reason}</td>
+        <td className="border p-2">{lr.status}</td>
+        <td className="border p-2">{lr.employeeId}</td>
+        <td className="border p-2">{lr.name}</td>
+      </tr>
+    ))
+  )}
+</tbody>
+
+
+
       </table>
 
       {/* Modal */}
