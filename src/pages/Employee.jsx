@@ -1,7 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import Lottie from 'lottie-react';
+import loadingAnimation from '../assets/loading.json';
 const Employee = () => {
+  const [loading, setLoading] = useState(true); 
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [formData, setFormData] = useState({
@@ -20,15 +23,19 @@ const Employee = () => {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
-const uri="https://springboot-ems.onrender.com"
+const uri = "https://springboot-ems.onrender.com"; // ✅ correct
+
   const fetchEmployees = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(`${uri}/api/employees/my-employees`, { headers });
       setEmployees(res.data);
       setFilteredEmployees(res.data);
     } catch (err) {
       console.error('Failed to fetch employees:', err);
-    }
+    }finally {
+    setLoading(false);  // End loading
+  }
   };
 
   useEffect(() => {
@@ -138,28 +145,39 @@ const uri="https://springboot-ems.onrender.com"
           </tr>
         </thead>
         <tbody>
-          {filteredEmployees.length > 0 ? (
-            filteredEmployees.map((emp) => (
-              <tr
-                key={emp.id}
-                onClick={() => handleRowClick(emp)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                <td className="border p-2">{emp.id}</td>
-                <td className="border p-2">{emp.name}</td>
-                <td className="border p-2">{emp.email}</td>
-                <td className="border p-2">{emp.department}</td>
-                <td className="border p-2">{emp.salary}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="text-center py-4">
-                No employee found.
-              </td>
-            </tr>
-          )}
-        </tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="5" className="text-center py-8">
+        <Lottie
+          animationData={loadingAnimation}
+          className="w-[250px] sm:w-[300px] md:w-[400px] lg:w-[450px] mx-auto"
+        />
+        <p className="mt-4 text-gray-500">Loading employees...</p>
+      </td>
+    </tr>
+  ) : filteredEmployees.length > 0 ? (
+    filteredEmployees.map((emp) => (
+      <tr
+        key={emp.id}
+        onClick={() => handleRowClick(emp)}
+        className="cursor-pointer hover:bg-gray-100"
+      >
+        <td className="border p-2">{emp.id}</td>
+        <td className="border p-2">{emp.name}</td>
+        <td className="border p-2">{emp.email}</td>
+        <td className="border p-2">{emp.department}</td>
+        <td className="border p-2">{emp.salary}</td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="5" className="text-center py-4 text-red-500 font-medium">
+        No employee found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
       </table>
 
       {/* Modal */}
